@@ -1,51 +1,48 @@
-"use-client";
+"use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
 import { useNotification } from "../components/Notification";
 import Link from "next/link";
 
-function Register() {
+export default function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [cnfPassword, setCnfPassword] = useState("");
-  const [error, setError] = useState<String | null>("");
-
-  const { showNotification } = useNotification();
-
+  const [confirmPassword, setConfirmPassword] = useState("");
   const router = useRouter();
+  const { showNotification } = useNotification();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (password !== cnfPassword) {
+
+    if (password !== confirmPassword) {
       showNotification("Passwords do not match", "error");
-      //   setError("Password doesn't match");
       return;
     }
-    const data = { email, password };
+
     try {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ email, password }),
       });
 
-      const json = await res.json();
+      const data = await res.json();
+
       if (!res.ok) {
-        setError("Registration Failed");
-        throw new Error(json.error || "Registration failed");
+        throw new Error(data.error || "Registration failed");
       }
+
       showNotification("Registration successful! Please log in.", "success");
       router.push("/login");
     } catch (error) {
-      setError("Registration Failed");
       showNotification(
         error instanceof Error ? error.message : "Registration failed",
         "error"
       );
-      return;
     }
   };
+
   return (
     <div className="max-w-md mx-auto">
       <h1 className="text-2xl font-bold mb-4">Register</h1>
@@ -83,8 +80,8 @@ function Register() {
           <input
             type="password"
             id="confirmPassword"
-            value={cnfPassword}
-            onChange={(e) => setCnfPassword(e.target.value)}
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
             required
             className="w-full px-3 py-2 border rounded"
           />
@@ -105,5 +102,3 @@ function Register() {
     </div>
   );
 }
-
-export default Register;

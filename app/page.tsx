@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { apiClient } from "@/lib/api-client";
-import { IVideo } from "@/models/Video";
 import VideoFeed from "./components/VideoFeed";
+import { IVideo } from "@/models/Video";
+import { apiClient } from "@/lib/api-client";
 
 export default function Home() {
   const [videos, setVideos] = useState<IVideo[]>([]);
@@ -11,17 +11,19 @@ export default function Home() {
   useEffect(() => {
     const fetchVideos = async () => {
       try {
-        await apiClient.getVideos().then((data) => setVideos(data));
+        const data = await apiClient.getVideos();
+        setVideos(data);
       } catch (error) {
-        console.error(error);
-        setVideos([]);
+        console.error("Error fetching videos:", error);
       }
     };
+
     fetchVideos();
   }, []);
+
   return (
     <main className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">ImageKit ReelsPro</h1>
+      <h1 className="text-3xl font-bold mb-8">Video Upload</h1>
       <VideoFeed videos={videos} />
     </main>
   );

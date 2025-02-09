@@ -18,29 +18,37 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
+          console.error("Missing credentials");
           throw new Error("Either Email or Password is missing");
         }
+
         try {
+          console.log("Connecting to DB...");
           await connectDB();
+
+          console.log("Searching for user:", credentials.email);
           const user = await User.findOne({ email: credentials.email });
 
           if (!user) {
+            console.error("User not found:", credentials.email);
             throw new Error("User not found");
           }
 
+          console.log("Checking password...");
           const isPasswordCorrect = await bcrypt.compare(
             credentials.password,
             user.password
           );
+
           if (!isPasswordCorrect) {
+            console.error("Incorrect password");
             throw new Error("Incorrect Password");
           }
 
-          return {
-            id: user._id.toString(),
-            email: user.email,
-          };
+          console.log("Authentication successful");
+          return { id: user._id.toString(), email: user.email };
         } catch (error) {
+          console.error("Authorize error:", error);
           throw new Error((error as Error).message);
         }
       },

@@ -1,42 +1,48 @@
 import { IVideo } from "@/models/Video";
 
+export type VideoFormData = Omit<IVideo, "_id">;
+
 type FetchOptions = {
-  method?: "GET" | "POST" | "DELETE" | "PUT";
+  method?: "GET" | "POST" | "PUT" | "DELETE";
   body?: any;
   headers?: Record<string, string>;
 };
 
-export type VideoFormData = Omit<IVideo, "_id">;
-
 class ApiClient {
-  private async fetchApi<T>(
-    url: string,
+  private async fetch<T>(
+    endpoint: string,
     options: FetchOptions = {}
   ): Promise<T> {
     const { method = "GET", body, headers = {} } = options;
+
     const defaultHeaders = {
       "Content-Type": "application/json",
       ...headers,
     };
-    const response = await fetch(`/api${url}`, {
+
+    const response = await fetch(`/api${endpoint}`, {
       method,
       headers: defaultHeaders,
       body: body ? JSON.stringify(body) : undefined,
     });
+
     if (!response.ok) {
       throw new Error(await response.text());
     }
+
     return response.json();
   }
 
   async getVideos() {
-    return this.fetchApi<IVideo[]>("/videos");
+    return this.fetch<IVideo[]>("/videos");
   }
-  async getSingleVideo(id: string) {
-    return this.fetchApi<IVideo>(`/videos/${id}`);
+
+  async getVideo(id: string) {
+    return this.fetch<IVideo>(`/videos/${id}`);
   }
+
   async createVideo(videoData: VideoFormData) {
-    return this.fetchApi<IVideo>("/videos", {
+    return this.fetch<IVideo>("/videos", {
       method: "POST",
       body: videoData,
     });
